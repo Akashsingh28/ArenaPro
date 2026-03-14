@@ -518,7 +518,7 @@ app.get("/api/notifications", requireAuth, async (req, res) => {
 
 app.get("/api/admin/users", requireAuth, requireAdmin, async (req, res) => {
     try {
-        const users = await User.find({}, "-password").sort({ createdAt: -1 });
+        const users = await User.find({}, "-password").populate("team", "name").sort({ createdAt: -1 });
         res.json({ success: true, data: users });
     } catch (err) {
         res.status(500).json({ message: err.message });
