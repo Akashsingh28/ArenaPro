@@ -38,7 +38,7 @@ const auth = {
     verifyAdminAuth: async () => {
         // Specifically used to secure the admin layout
         try {
-            const data = await apiFetch('/auth/me');
+            const data = await apiFetch('/users/me');
             if (data.success && data.user && data.user.role === 'admin') {
                 auth.setUser(data.user);
                 return true;
