@@ -514,6 +514,32 @@ app.get("/api/notifications", requireAuth, async (req, res) => {
     }
 });
 
+/* ---------------- ADMIN USERS ---------------- */
+
+app.get("/api/admin/users", requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const users = await User.find({}, "-password").sort({ createdAt: -1 });
+        res.json({ success: true, data: users });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+app.put("/api/admin/users/:id/ban", requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+        if (user.role === "admin") return res.status(403).json({ message: "Cannot ban an admin" });
+
+        user.isBanned = !user.isBanned;
+        await user.save();
+
+        res.json({ success: true, isBanned: user.isBanned });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 /* ---------------- SERVER ---------------- */
 
 app.listen(5000, () => {
