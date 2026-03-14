@@ -39,8 +39,8 @@ const auth = {
         // Specifically used to secure the admin layout
         try {
             const data = await apiFetch('/users/me');
-            if (data.success && data.user && data.user.role === 'admin') {
-                auth.setUser(data.user);
+            if (data.data && data.data.role === 'admin') {
+                auth.setUser(data.data);
                 return true;
             }
             return false;
@@ -101,12 +101,12 @@ function setActiveNavLink() {
 
 // Update login button to show username when logged in
 function updateNavbar() {
-    const loginBtn = document.querySelector('a.btn-primary[href="login.html"]');
-    if (loginBtn && auth.isLoggedIn()) {
+    const loginBtns = document.querySelectorAll('a[href="login.html"]');
+    if (loginBtns.length > 0 && auth.isLoggedIn()) {
         const user = auth.getUser();
         if (user) {
-            loginBtn.innerHTML = `<span class="nav-icon">👤</span> ${user.username}`;
-            loginBtn.href = user.role === 'admin' ? 'admin.html' : 'player-profile.html';
+            loginBtns.forEach(btn => { btn.innerHTML = `<span class="nav-icon">👤</span> ${user.username}`;
+            btn.href = user.role === 'admin' ? 'admin.html' : 'player-profile.html'; });
         }
     }
     
