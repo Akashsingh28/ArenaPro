@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - ArenaPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🏆</div>
+                <span class="logo-text">ARENA<span class="text-primary">PRO</span></span>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    Home
+                </a>
+                <a href="tournaments.html" class="nav-link">
+                    <span class="nav-icon">🏆</span>
+                    Tournaments
+                </a>
+                <div class="nav-dropdown">
+                    <a href="teams.html" class="nav-link">
+                        <span class="nav-icon">👥</span>
+                        Teams
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="teams.html" class="dropdown-item">👥 View All Teams</a>
+                        <a href="create-team.html" class="dropdown-item">➕ Create Team</a>
+                    </div>
+                </div>
+                <a href="leaderboard.html" class="nav-link active">
+                    <span class="nav-icon">🏅</span>
+                    Leaderboard
+                </a>
+                <a href="#" class="nav-link" id="nav-notifications-btn" onclick="toggleNotifications(event)">
+                    <span class="nav-icon">🔔</span>
+                    <span id="nav-notif-count" style="background:#ff4757;color:#fff;border-radius:50%;padding:2px 6px;font-size:0.7rem;position:absolute;top:5px;right:5px;display:none;">0</span>
+                    Alerts
+                </a>
+            </div>
+
+            <a href="login.html" class="btn btn-primary">
+                <span class="nav-icon">🔐</span>
+                Login
+            </a>
+        </div>
+        
+        <!-- Notifications Dropdown -->
+        <div id="notifications-dropdown" style="display:none;position:absolute;top:70px;right:20px;width:300px;background:var(--color-card);border:1px solid var(--color-border);border-radius:10px;box-shadow:0 10px 15px -3px rgba(0,0,0,0.5);z-index:9999;max-height:400px;overflow-y:auto;padding:1rem;">
+            <h3 style="font-size:1rem;margin-bottom:1rem;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:0.5rem;">Notifications</h3>
+            <div id="notifications-list" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="text-align:center;color:var(--color-text-secondary);font-size:0.875rem;">Loading...</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-gradient"></div>
+        
+        <div class="container" style="padding: 3rem 1rem;">
+            <div class="hero-content">
+                <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 1rem;">
+                    <span class="text-primary glow">Leaderboard</span>
+                </h1>
+                <p class="hero-description" style="margin-bottom: 0;">
+                    Top performing teams across all games
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Leaderboard -->
+    <section class="section">
+        <div class="container">
+            <div class="leaderboard-container">
+                <div class="leaderboard-table">
+                    <div class="table-header">
+                        <div class="table-cell" style="width: 80px;">Rank</div>
+                        <div class="table-cell" style="flex: 1;">Team</div>
+                        <div class="table-cell" style="width: 150px;">Game</div>
+                        <div class="table-cell" style="width: 100px;">Points</div>
+                        <div class="table-cell" style="width: 100px;">W/L</div>
+                        <div class="table-cell" style="width: 100px;">Win Rate</div>
+                    </div>
+                    <div id="leaderboard-body">
+                        <!-- Leaderboard rows will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; Akash Singh</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        async function loadLeaderboard() {
+            const container = document.getElementById('leaderboard-body');
+            container.innerHTML = '<div style="padding:1.5rem;text-align:center;color:var(--color-text-secondary);">Loading leaderboard...</div>';
+
+            try {
+                const data        = await apiFetch('/leaderboard');
+                const leaderboard = data.data;
+
+                if (leaderboard.length === 0) {
+                    container.innerHTML = '<div style="padding:1.5rem;text-align:center;color:var(--color-text-secondary);">No teams on the leaderboard yet.</div>';
+                    return;
+                }
+
+                container.innerHTML = leaderboard.map(entry => {
+                    let rankClass = '', medal = '';
+                    if (entry.rank === 1) { rankClass = 'rank-gold';   medal = '🥇'; }
+                    else if (entry.rank === 2) { rankClass = 'rank-silver'; medal = '🥈'; }
+                    else if (entry.rank === 3) { rankClass = 'rank-bronze'; medal = '🥉'; }
+
+                    return `
+                        <div class="table-row ${rankClass}">
+                            <div class="table-cell" style="width:80px;font-weight:700;">${medal} #${entry.rank}</div>
+                            <div class="table-cell" style="flex:1;font-weight:600;">${entry.team}</div>
+                            <div class="table-cell" style="width:150px;color:var(--color-text-secondary);">${entry.game}</div>
+                            <div class="table-cell" style="width:100px;color:var(--color-primary);font-weight:600;">${entry.points}</div>
+                            <div class="table-cell" style="width:100px;">${entry.wins}/${entry.losses}</div>
+                            <div class="table-cell" style="width:100px;color:#10b981;font-weight:600;">${entry.winRate}</div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                container.innerHTML = `<div style="padding:1.5rem;text-align:center;color:var(--color-primary);">⚠️ ${err.message}<br><small style="color:var(--color-text-secondary)">Make sure the backend server is running on port 5000.</small></div>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLeaderboard();
+        });
+    </script>
+
+    <style>
+        .leaderboard-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .leaderboard-table {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            padding: 1rem 1.5rem;
+            background-color: rgba(255, 71, 87, 0.1);
+            border-bottom: 1px solid var(--color-border);
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .table-row {
+            display: flex;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+        }
+
+        .table-row:hover {
+            background-color: rgba(255, 71, 87, 0.05);
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .rank-gold {
+            background-color: rgba(255, 215, 0, 0.05);
+        }
+
+        .rank-silver {
+            background-color: rgba(192, 192, 192, 0.05);
+        }
+
+        .rank-bronze {
+            background-color: rgba(205, 127, 50, 0.05);
+        }
+
+        .table-cell {
+            display: flex;
+            align-items: center;
+            padding: 0 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .table-header {
+                display: none;
+            }
+
+            .table-row {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .table-cell {
+                width: 100% !important;
+                justify-content: space-between;
+            }
+
+            .table-cell::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--color-text-secondary);
+            }
+        }
+    </style>
+</body>
+</html>

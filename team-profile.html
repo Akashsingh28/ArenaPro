@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Profile - ArenaPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🏆</div>
+                <span class="logo-text">ARENA<span class="text-primary">PRO</span></span>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    Home
+                </a>
+                <a href="tournaments.html" class="nav-link">
+                    <span class="nav-icon">🏆</span>
+                    Tournaments
+                </a>
+                <div class="nav-dropdown">
+                    <a href="teams.html" class="nav-link active">
+                        <span class="nav-icon">👥</span>
+                        Teams
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="teams.html" class="dropdown-item">👥 View All Teams</a>
+                        <a href="create-team.html" class="dropdown-item">➕ Create Team</a>
+                    </div>
+                </div>
+                <a href="leaderboard.html" class="nav-link">
+                    <span class="nav-icon">🏅</span>
+                    Leaderboard
+                </a>
+            </div>
+
+            <a href="login.html" class="btn btn-primary">
+                <span class="nav-icon">🔐</span>
+                Login
+            </a>
+        </div>
+    </nav>
+
+    <!-- Team Profile Content -->
+    <div id="team-profile-content">
+        <!-- Content will be loaded here by JavaScript -->
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; Akash Singh</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        async function loadTeamProfile() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const teamId    = urlParams.get('id');   // MongoDB ObjectId string
+
+            const content = document.getElementById('team-profile-content');
+            content.innerHTML = '<div style="text-align:center;padding:4rem 1rem;color:var(--color-text-secondary);">Loading team...</div>';
+
+            if (!teamId) {
+                content.innerHTML = `<section class="section"><div class="container" style="text-align:center;padding:4rem 1rem;"><h2 style="color:var(--color-text);margin-bottom:1rem;">Team Not Found</h2><a href="teams.html" class="btn btn-primary">Back to Teams</a></div></section>`;
+                return;
+            }
+
+            try {
+                const data = await apiFetch(`/teams/${teamId}`);
+                const team = data.data;
+                const captainName  = team.captainUsername || 'Captain';
+                const memberNames  = team.memberUsernames || [];
+                const otherMembers = memberNames.filter(m => m !== captainName);
+
+                content.innerHTML = `
+                <!-- Hero Section -->
+                <section class="hero">
+                    <div class="hero-bg"></div>
+                    <div class="hero-gradient"></div>
+                    <div class="container" style="padding: 3rem 1rem;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; justify-content: center; width: 5rem; height: 5rem; border-radius: 1rem; background-color: rgba(255, 71, 87, 0.1); border: 2px solid var(--color-border); font-size: 3rem;">
+                                ${team.logo}
+                            </div>
+                            <div style="text-align: left;">
+                                <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 0.5rem;">${team.name}</h1>
+                                <p class="hero-description" style="margin-bottom: 0; font-size: 1.25rem;">${team.game}</p>
+                            </div>
+                        </div>
+                        <div style="text-align: center;">
+                            <span style="display: inline-block; padding: 0.5rem 1rem; background-color: rgba(255, 71, 87, 0.1); border: 1px solid var(--color-border); border-radius: 2rem; color: var(--color-primary); font-weight: 600;">
+                                ${team.points} Points
+                            </span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Team Stats -->
+                <section class="section">
+                    <div class="container">
+                        <div class="stats-grid" style="max-width: 800px; margin: 0 auto;">
+                            <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-value">${team.points}</div><div class="stat-label">Total Points</div></div>
+                            <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value">${team.wins}</div><div class="stat-label">Wins</div></div>
+                            <div class="stat-card"><div class="stat-icon">❌</div><div class="stat-value">${team.losses}</div><div class="stat-label">Losses</div></div>
+                            <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value">${memberNames.length}</div><div class="stat-label">Members</div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Team Members -->
+                <section class="section">
+                    <div class="container">
+                        <h2 class="section-title" style="text-align: center; margin-bottom: 2rem;">Team Members</h2>
+                        <div style="max-width: 600px; margin: 0 auto;">
+                            <div class="tournament-card" style="margin-bottom: 1.5rem;">
+                                <div class="tournament-accent"></div>
+                                <div class="tournament-content">
+                                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                        <div style="display: flex; align-items: center; justify-content: center; width: 3rem; height: 3rem; border-radius: 50%; background-color: rgba(255, 71, 87, 0.1); border: 1px solid var(--color-border); font-size: 1.5rem;">👑</div>
+                                        <div>
+                                            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.25rem;">${captainName}</h3>
+                                            <p style="font-size: 0.875rem; color: var(--color-primary);">Team Captain</p>
+                                        </div>
+                                    </div>
+                                    <div style="padding: 1rem; background-color: rgba(0,0,0,0.3); border-radius: 0.5rem;">
+                                        <div class="detail-row"><span class="detail-label">Role</span><span class="detail-value">Captain &amp; Leader</span></div>
+                                        <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" style="color: #10b981;">Active</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            ${otherMembers.map(member => `
+                                <div class="tournament-card" style="margin-bottom: 1rem;">
+                                    <div class="tournament-content" style="padding: 1.25rem;">
+                                        <div style="display: flex; align-items: center; gap: 1rem;">
+                                            <div style="display: flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; background-color: rgba(255,71,87,0.1); border: 1px solid var(--color-border); font-size: 1.25rem;">👤</div>
+                                            <div style="flex: 1;">
+                                                <h3 style="font-size: 1.125rem; font-weight: 600; color: var(--color-text);">${member}</h3>
+                                                <p style="font-size: 0.875rem; color: var(--color-text-secondary);">Team Member</p>
+                                            </div>
+                                            <span style="padding: 0.25rem 0.75rem; background-color: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 1rem; color: #10b981; font-size: 0.75rem; font-weight: 600;">Active</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Actions -->
+                <section class="section">
+                    <div class="container" style="text-align: center;">
+                        <a href="teams.html" class="btn btn-outline btn-lg">← Back to Teams</a>
+                    </div>
+                </section>
+                `;
+            } catch (err) {
+                content.innerHTML = `<div style="text-align:center;padding:4rem 1rem;"><p style="color:var(--color-primary);font-size:1.25rem;">⚠️ ${err.message}</p><p style="color:var(--color-text-secondary);margin:.5rem 0 2rem;">Make sure the backend server is running on port 5000.</p><a href="teams.html" class="btn btn-primary">Back to Teams</a></div>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTeamProfile();
+        });
+    </script>
+</body>
+</html>

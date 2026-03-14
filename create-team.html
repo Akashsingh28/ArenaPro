@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Team - ArenaPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🏆</div>
+                <span class="logo-text">ARENA<span class="text-primary">PRO</span></span>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    Home
+                </a>
+                <a href="tournaments.html" class="nav-link">
+                    <span class="nav-icon">🏆</span>
+                    Tournaments
+                </a>
+                <div class="nav-dropdown">
+                    <a href="teams.html" class="nav-link active">
+                        <span class="nav-icon">👥</span>
+                        Teams
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="teams.html" class="dropdown-item">👥 View All Teams</a>
+                        <a href="create-team.html" class="dropdown-item">➕ Create Team</a>
+                    </div>
+                </div>
+                <a href="leaderboard.html" class="nav-link">
+                    <span class="nav-icon">🏅</span>
+                    Leaderboard
+                </a>
+            </div>
+
+            <a href="login.html" class="btn btn-primary">
+                <span class="nav-icon">🔐</span>
+                Login
+            </a>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-gradient"></div>
+        
+        <div class="container" style="padding: 3rem 1rem;">
+            <div class="hero-content">
+                <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 1rem;">
+                    Create Your <span class="text-primary glow">Team</span>
+                </h1>
+                <p class="hero-description" style="margin-bottom: 0;">
+                    Build your squad and compete in tournaments
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Create Team Form -->
+    <section class="section">
+        <div class="container">
+            <div style="max-width: 700px; margin: 0 auto;">
+                <div class="tournament-card">
+                    <div class="tournament-accent"></div>
+                    <div class="tournament-content" style="padding: 2rem;">
+                        <form id="create-team-form" onsubmit="handleCreateTeam(event)">
+                            <!-- Team Name -->
+                            <div class="form-group">
+                                <label for="team-name">Team Name *</label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">👥</span>
+                                    <input type="text" id="team-name" placeholder="Enter team name" required>
+                                </div>
+                                <p style="font-size: 0.75rem; color: var(--color-text-secondary); margin-top: 0.5rem;">
+                                    Choose a unique and memorable name for your team
+                                </p>
+                            </div>
+
+                            <!-- Team Logo -->
+                            <div class="form-group">
+                                <label for="team-logo">Team Logo (Emoji) *</label>
+                                <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 0.5rem;">
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('🔥')">🔥</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('⚡')">⚡</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('🐺')">🐺</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('🐉')">🐉</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('🦅')">🦅</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('🦁')">🦁</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('👑')">👑</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('💀')">💀</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('⚔️')">⚔️</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('🛡️')">🛡️</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('🎯')">🎯</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('💎')">💎</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('🌟')">🌟</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('💥')">💥</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('🚀')">🚀</button>
+                                    <button type="button" class="emoji-btn" onclick="selectEmoji('👊')">👊</button>
+                                </div>
+                                <input type="hidden" id="team-logo" required>
+                                <div id="selected-emoji" style="text-align: center; font-size: 3rem; margin-top: 1rem; min-height: 60px;">
+                                    <!-- Selected emoji will appear here -->
+                                </div>
+                            </div>
+
+                            <!-- Game Selection -->
+                            <div class="form-group">
+                                <label for="team-game">Primary Game *</label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">🎮</span>
+                                    <select id="team-game" required>
+                                        <option value="">Select a game</option>
+                                        <option value="Free Fire">Free Fire</option>
+                                        <option value="BGMI">BGMI</option>
+                                        <option value="Valorant">Valorant</option>
+                                        <option value="COD Mobile">COD Mobile</option>
+                                        <option value="Clash of Clans">Clash of Clans</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Team Tag -->
+                            <div class="form-group">
+                                <label for="team-tag">Team Tag (Optional)</label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">🏷️</span>
+                                    <input type="text" id="team-tag" placeholder="e.g., PS, SW, TF" maxlength="5">
+                                </div>
+                                <p style="font-size: 0.75rem; color: var(--color-text-secondary); margin-top: 0.5rem;">
+                                    Short 2-5 character tag for your team
+                                </p>
+                            </div>
+
+                            <!-- Team Description -->
+                            <div class="form-group">
+                                <label for="team-description">Team Description</label>
+                                <textarea 
+                                    id="team-description" 
+                                    rows="4" 
+                                    placeholder="Tell others about your team, playstyle, and goals..."
+                                    style="width: 100%; padding: 0.75rem; background-color: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem; color: var(--color-text); font-family: var(--font-body); resize: vertical;"
+                                ></textarea>
+                            </div>
+
+                            <!-- Team Members -->
+                            <div class="form-group">
+                                <label>Team Roster <span style="color:var(--color-text-secondary);font-weight:400;font-size:0.875rem;">(1 Leader + 4 Players)</span></label>
+
+                                <!-- Leader (Captain) -->
+                                <p style="font-size:0.8rem;color:var(--color-primary);font-weight:600;margin:0.75rem 0 0.4rem;">👑 Leader (Captain)</p>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">🎮</span>
+                                        <input type="text" id="leader-ign" placeholder="Your In-Game Name (IGN)" required>
+                                    </div>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">#️⃣</span>
+                                        <input type="text" id="leader-uid" placeholder="Your UID" required>
+                                    </div>
+                                </div>
+
+                                <!-- 4 Players -->
+                                <p style="font-size:0.8rem;color:var(--color-text-secondary);font-weight:600;margin:0 0 0.4rem;">👥 Players</p>
+                                <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                                    <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.75rem;align-items:center;">
+                                        <span style="font-size:0.8rem;color:var(--color-text-secondary);min-width:56px;">Player 1</span>
+                                        <div class="input-wrapper"><span class="input-icon">🎮</span><input type="text" id="p1-ign" placeholder="IGN" required></div>
+                                        <div class="input-wrapper"><span class="input-icon">#️⃣</span><input type="text" id="p1-uid" placeholder="UID" required></div>
+                                    </div>
+                                    <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.75rem;align-items:center;">
+                                        <span style="font-size:0.8rem;color:var(--color-text-secondary);min-width:56px;">Player 2</span>
+                                        <div class="input-wrapper"><span class="input-icon">🎮</span><input type="text" id="p2-ign" placeholder="IGN" required></div>
+                                        <div class="input-wrapper"><span class="input-icon">#️⃣</span><input type="text" id="p2-uid" placeholder="UID" required></div>
+                                    </div>
+                                    <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.75rem;align-items:center;">
+                                        <span style="font-size:0.8rem;color:var(--color-text-secondary);min-width:56px;">Player 3</span>
+                                        <div class="input-wrapper"><span class="input-icon">🎮</span><input type="text" id="p3-ign" placeholder="IGN" required></div>
+                                        <div class="input-wrapper"><span class="input-icon">#️⃣</span><input type="text" id="p3-uid" placeholder="UID" required></div>
+                                    </div>
+                                    <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.75rem;align-items:center;">
+                                        <span style="font-size:0.8rem;color:var(--color-text-secondary);min-width:56px;">Player 4</span>
+                                        <div class="input-wrapper"><span class="input-icon">🎮</span><input type="text" id="p4-ign" placeholder="IGN" required></div>
+                                        <div class="input-wrapper"><span class="input-icon">#️⃣</span><input type="text" id="p4-uid" placeholder="UID" required></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recruitment -->
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" id="open-recruitment" style="width: auto;">
+                                    <span>Open for recruitment</span>
+                                </label>
+                                <p style="font-size: 0.75rem; color: var(--color-text-secondary); margin-top: 0.5rem; margin-left: 1.5rem;">
+                                    Allow other players to request to join your team
+                                </p>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                                <button type="submit" class="btn btn-primary btn-full">
+                                    Create Team
+                                    <span class="arrow">→</span>
+                                </button>
+                                <a href="teams.html" class="btn btn-outline btn-full">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; Akash Singh</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let selectedEmojiValue = '';
+
+        function selectEmoji(emoji) {
+            selectedEmojiValue = emoji;
+            document.getElementById('team-logo').value = emoji;
+            document.getElementById('selected-emoji').textContent = emoji;
+            document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        async function handleCreateTeam(event) {
+            event.preventDefault();
+
+            if (!auth.isLoggedIn()) {
+                alert('You must be logged in to create a team.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const teamLogo = document.getElementById('team-logo').value;
+            if (!teamLogo) {
+                alert('Please select a team logo emoji');
+                return;
+            }
+
+            // Collect Leader + 4 Players
+            const leaderIGN = document.getElementById('leader-ign').value.trim();
+            const leaderUID = document.getElementById('leader-uid').value.trim();
+            const captainEntry = leaderUID ? `${leaderIGN} (UID: ${leaderUID})` : leaderIGN;
+
+            const memberUsernames = [captainEntry];
+            for (let i = 1; i <= 4; i++) {
+                const ign = document.getElementById(`p${i}-ign`).value.trim();
+                const uid = document.getElementById(`p${i}-uid`).value.trim();
+                if (ign) memberUsernames.push(uid ? `${ign} (UID: ${uid})` : ign);
+            }
+
+            const btn = event.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+
+            try {
+                const user = auth.getUser();
+                const data = await apiFetch('/teams', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        name:            document.getElementById('team-name').value.trim(),
+                        logo:            teamLogo,
+                        game:            document.getElementById('team-game').value,
+                        tag:             document.getElementById('team-tag').value.trim(),
+                        description:     document.getElementById('team-description').value.trim(),
+                        captainUsername: user ? user.username : '',
+                        memberUsernames,
+                        openRecruitment: document.getElementById('open-recruitment').checked
+                    })
+                });
+
+                // Update user's cached data with new team
+                if (user) {
+                    user.team = data.data._id;
+                    auth.setUser(user);
+                }
+
+                alert(`Team "${data.data.name}" created successfully! 🎉`);
+                window.location.href = 'teams.html';
+            } catch (err) {
+                alert('Error: ' + err.message);
+                btn.disabled = false;
+                btn.innerHTML = 'Create Team <span class="arrow">→</span>';
+            }
+        }
+    </script>
+
+    <style>
+        .input-wrapper select {
+            width: 100%;
+            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            color: var(--color-text);
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .input-wrapper select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .emoji-btn {
+            padding: 0.75rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .emoji-btn:hover {
+            background-color: rgba(255, 71, 87, 0.1);
+            border-color: var(--color-primary);
+            transform: scale(1.1);
+        }
+
+        .emoji-btn.active {
+            background-color: rgba(255, 71, 87, 0.2);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.3);
+        }
+
+        input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            accent-color: var(--color-primary);
+        }
+    </style>
+</body>
+</html>

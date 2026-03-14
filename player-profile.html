@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - ArenaPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🏆</div>
+                <span class="logo-text">ARENA<span class="text-primary">PRO</span></span>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    Home
+                </a>
+                <a href="tournaments.html" class="nav-link">
+                    <span class="nav-icon">🏆</span>
+                    Tournaments
+                </a>
+                <div class="nav-dropdown">
+                    <a href="teams.html" class="nav-link">
+                        <span class="nav-icon">👥</span>
+                        Teams
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="teams.html" class="dropdown-item">👥 View All Teams</a>
+                        <a href="create-team.html" class="dropdown-item">➕ Create Team</a>
+                    </div>
+                </div>
+                <a href="leaderboard.html" class="nav-link">
+                    <span class="nav-icon">🏅</span>
+                    Leaderboard
+                </a>
+                <a href="#" class="nav-link" id="nav-notifications-btn" onclick="toggleNotifications(event)">
+                    <span class="nav-icon">🔔</span>
+                    <span id="nav-notif-count" style="background:#ff4757;color:#fff;border-radius:50%;padding:2px 6px;font-size:0.7rem;position:absolute;top:5px;right:5px;display:none;">0</span>
+                    Alerts
+                </a>
+            </div>
+
+            <a href="login.html" class="btn btn-primary">
+                <span class="nav-icon">🔐</span>
+                Login
+            </a>
+        </div>
+        
+        <!-- Notifications Dropdown -->
+        <div id="notifications-dropdown" style="display:none;position:absolute;top:70px;right:20px;width:300px;background:var(--color-card);border:1px solid var(--color-border);border-radius:10px;box-shadow:0 10px 15px -3px rgba(0,0,0,0.5);z-index:9999;max-height:400px;overflow-y:auto;padding:1rem;">
+            <h3 style="font-size:1rem;margin-bottom:1rem;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:0.5rem;">Notifications</h3>
+            <div id="notifications-list" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="text-align:center;color:var(--color-text-secondary);font-size:0.875rem;">Loading...</div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="player-profile-content"></div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; Akash Singh</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        const profileState = {
+            user: null,
+            teams: [],
+            tournaments: []
+        };
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getInitials(name) {
+            return (name || 'AP')
+                .split(/\s+/)
+                .filter(Boolean)
+                .slice(0, 2)
+                .map((part) => part[0].toUpperCase())
+                .join('');
+        }
+
+        function formatDate(value) {
+            if (!value) return 'TBA';
+            const parsed = new Date(value);
+            if (Number.isNaN(parsed.getTime())) return value;
+            return parsed.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function renderProfile() {
+            const content = document.getElementById('player-profile-content');
+            const user = profileState.user;
+            const teams = profileState.teams;
+            const tournaments = profileState.tournaments;
+            const joinedOn = user.createdAt ? formatDate(user.createdAt) : 'Recently';
+            const totalPoints = teams.reduce((sum, team) => sum + (team.points || 0), 0);
+
+            content.innerHTML = `
+                <section class="hero">
+                    <div class="hero-bg"></div>
+                    <div class="hero-gradient"></div>
+                    <div class="container hero-container">
+                        <div class="profile-hero">
+                            <div class="profile-avatar-card">
+                                <div class="profile-avatar">
+                                    ${user.avatar ? `<img src="${user.avatar}" alt="Profile photo" class="profile-avatar-image">` : `<span class="profile-avatar-fallback">${escapeHtml(getInitials(user.username))}</span>`}
+                                </div>
+                                <input type="file" id="profile-photo-input" accept="image/*" style="display:none;">
+                                <button type="button" class="btn btn-outline btn-full" id="change-photo-btn">Add Photo</button>
+                                <p class="profile-note">JPG, PNG or WEBP up to 1 MB.</p>
+                            </div>
+
+                            <div class="profile-hero-copy">
+                                <p class="profile-eyebrow">User Profile</p>
+                                <h1 class="hero-title">${escapeHtml(user.username)}</h1>
+                                <p class="hero-description">Manage your photo, username, teams, tournaments, and account actions from one place.</p>
+                                <div class="profile-badges">
+                                    <span class="profile-badge">${teams.length} Team${teams.length === 1 ? '' : 's'}</span>
+                                    <span class="profile-badge">${tournaments.length} Tournament${tournaments.length === 1 ? '' : 's'}</span>
+                                    <span class="profile-badge">${totalPoints} Team Points</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <div class="container profile-layout">
+                        <aside class="profile-panel profile-sidebar">
+                            <div class="profile-sidebar-section">
+                                <h2 class="section-title">Account</h2>
+                                <div class="profile-meta-list">
+                                    <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${escapeHtml(user.email)}</span></div>
+                                    <div class="detail-row"><span class="detail-label">Role</span><span class="detail-value primary">${escapeHtml(user.role)}</span></div>
+                                    <div class="detail-row"><span class="detail-label">Joined</span><span class="detail-value">${escapeHtml(joinedOn)}</span></div>
+                                </div>
+                            </div>
+
+                            <div class="profile-sidebar-section">
+                                <button type="button" class="btn btn-outline btn-full" id="sidebar-logout-btn">Logout</button>
+                            </div>
+                        </aside>
+
+                        <div class="profile-main">
+                            <div class="profile-panel">
+                                <div class="section-header">
+                                    <div>
+                                        <h2 class="section-title">Edit Profile</h2>
+                                        <p class="section-description">Update your username and save your profile photo.</p>
+                                    </div>
+                                </div>
+                                <form id="profile-form" class="profile-form">
+                                    <div class="profile-form-grid">
+                                        <div class="form-group">
+                                            <label for="profile-username">Username</label>
+                                            <div class="input-wrapper">
+                                                <span class="input-icon">👤</span>
+                                                <input type="text" id="profile-username" value="${escapeHtml(user.username)}" maxlength="20" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="profile-email">Email</label>
+                                            <div class="input-wrapper">
+                                                <span class="input-icon">📧</span>
+                                                <input type="email" id="profile-email" value="${escapeHtml(user.email)}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="profile-message" class="profile-message" style="display:none;"></div>
+                                    <div class="profile-actions">
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                        <button type="button" class="btn btn-outline" id="main-logout-btn">Logout</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="profile-panel">
+                                <div class="section-header">
+                                    <div>
+                                        <h2 class="section-title">Notifications</h2>
+                                        <p class="section-description">Get a quick reminder for your next tournament.</p>
+                                    </div>
+                                </div>
+                                <div class="profile-actions">
+                                    <button type="button" class="btn btn-primary" id="enable-notifications-btn">Enable Notifications</button>
+                                    <button type="button" class="btn btn-outline" id="send-notification-btn">Send Reminder</button>
+                                </div>
+                                <p style="margin-top:0.75rem;color:var(--color-text-secondary);font-size:0.875rem;">This uses browser notifications. Keep the page open and allow permission when asked.</p>
+                            </div>
+
+                            <div class="profile-panel">
+                                <div class="section-header">
+                                    <div>
+                                        <h2 class="section-title">Team Details</h2>
+                                        <p class="section-description">Your created team and roster overview.</p>
+                                    </div>
+                                    <a href="create-team.html" class="btn btn-outline">Create Team</a>
+                                </div>
+                                <div class="profile-stack">
+                                    ${teams.length ? teams.map((team) => `
+                                        <div class="tournament-card">
+                                            <div class="tournament-accent"></div>
+                                            <div class="tournament-content">
+                                                <div class="tournament-header">
+                                                    <div>
+                                                        <h3 class="tournament-name">${escapeHtml(team.logo || '👥')} ${escapeHtml(team.name)}</h3>
+                                                        <p class="tournament-game">${escapeHtml(team.game || 'Game not set')}</p>
+                                                    </div>
+                                                    <a href="team-profile.html?id=${team._id}" class="btn btn-outline">View Team</a>
+                                                </div>
+                                                <div class="tournament-details">
+                                                    <div class="detail-row"><span class="detail-label">Captain</span><span class="detail-value">${escapeHtml(team.captainUsername || 'You')}</span></div>
+                                                    <div class="detail-row"><span class="detail-label">Members</span><span class="detail-value">${(team.memberUsernames || []).length}</span></div>
+                                                    <div class="detail-row"><span class="detail-label">Record</span><span class="detail-value">${team.wins || 0}W / ${team.losses || 0}L</span></div>
+                                                    <div class="detail-row"><span class="detail-label">Points</span><span class="detail-value primary">${team.points || 0}</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('') : `<div class="profile-empty">No team found for this account yet. Create one to show it here.</div>`}
+                                </div>
+                            </div>
+
+                            <div class="profile-panel">
+                                <div class="section-header">
+                                    <div>
+                                        <h2 class="section-title">Tournament Details</h2>
+                                        <p class="section-description">Open and recent tournaments relevant to your account.</p>
+                                    </div>
+                                    <a href="tournaments.html" class="btn btn-outline">Browse All</a>
+                                </div>
+                                <div class="profile-stack">
+                                    ${tournaments.length ? tournaments.map((tournament) => `
+                                        <div class="tournament-card">
+                                            <div class="tournament-content">
+                                                <div class="tournament-header">
+                                                    <div>
+                                                        <h3 class="tournament-name">${escapeHtml(tournament.name)}</h3>
+                                                        <p class="tournament-game">${escapeHtml(tournament.game || 'Game not set')}</p>
+                                                    </div>
+                                                    <span class="profile-status-badge">${escapeHtml(tournament.status || 'open')}</span>
+                                                </div>
+                                                <div class="tournament-details">
+                                                    <div class="detail-row"><span class="detail-label">Date</span><span class="detail-value">${escapeHtml(formatDate(tournament.date))}</span></div>
+                                                    <div class="detail-row"><span class="detail-label">Start Time</span><span class="detail-value">${escapeHtml(tournament.startTime || '18:00')}</span></div>
+                                                    <div class="detail-row"><span class="detail-label">Prize Pool</span><span class="detail-value primary">₹${Number(tournament.prizePool || 0).toLocaleString('en-IN')}</span></div>
+                                                    <div class="detail-row"><span class="detail-label">Teams</span><span class="detail-value">${tournament.registeredTeams || 0} / ${tournament.maxTeams || 0}</span></div>
+                                                </div>
+                                                <a href="tournament-details.html?id=${tournament._id}" class="btn btn-outline">View Details</a>
+                                            </div>
+                                        </div>
+                                    `).join('') : `<div class="profile-empty">No tournaments available right now.</div>`}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+
+            document.getElementById('profile-form').addEventListener('submit', handleProfileSave);
+            document.getElementById('change-photo-btn').addEventListener('click', () => {
+                document.getElementById('profile-photo-input').click();
+            });
+            document.getElementById('profile-photo-input').addEventListener('change', handlePhotoChange);
+            document.getElementById('sidebar-logout-btn').addEventListener('click', () => auth.logout());
+            document.getElementById('main-logout-btn').addEventListener('click', () => auth.logout());
+            document.getElementById('enable-notifications-btn').addEventListener('click', requestNotificationPermission);
+            document.getElementById('send-notification-btn').addEventListener('click', sendTournamentNotification);
+        }
+
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                showProfileMessage('This browser does not support notifications.', 'error');
+                return;
+            }
+
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                showProfileMessage('Notifications enabled successfully.', 'success');
+            } else {
+                showProfileMessage('Notification permission was not granted.', 'error');
+            }
+        }
+
+        function sendTournamentNotification() {
+            if (!('Notification' in window)) {
+                showProfileMessage('This browser does not support notifications.', 'error');
+                return;
+            }
+
+            const upcoming = (profileState.tournaments || [])[0];
+            const title = upcoming
+                ? `Upcoming: ${upcoming.name}`
+                : 'ArenaPro Reminder';
+            const body = upcoming
+                ? `${upcoming.game} starts on ${formatDate(upcoming.date)} at ${upcoming.startTime || '18:00'}`
+                : 'Check latest tournaments and register your team.';
+
+            if (Notification.permission === 'granted') {
+                new Notification(title, { body, icon: 'https://cdn-icons-png.flaticon.com/512/2583/2583344.png' });
+                showProfileMessage('Notification sent.', 'success');
+                return;
+            }
+
+            showProfileMessage('Please enable notifications first.', 'error');
+        }
+
+        function showProfileMessage(message, type) {
+            const element = document.getElementById('profile-message');
+            if (!element) return;
+
+            element.textContent = message;
+            element.className = `profile-message ${type}`;
+            element.style.display = 'block';
+        }
+
+        async function handlePhotoChange(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 1024 * 1024) {
+                showProfileMessage('Photo must be 1 MB or smaller.', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                profileState.user.avatar = reader.result;
+                renderProfile();
+                showProfileMessage('Photo added. Click Save Changes to store it.', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function handleProfileSave(event) {
+            event.preventDefault();
+
+            const previousUsername = profileState.user.username;
+            const username = document.getElementById('profile-username').value.trim();
+            if (!username) {
+                showProfileMessage('Username is required.', 'error');
+                return;
+            }
+
+            if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                showProfileMessage('Username can only contain letters, numbers, and underscores.', 'error');
+                return;
+            }
+
+            const submitButton = event.target.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Saving...';
+
+            try {
+                const response = await apiFetch('/users/me', {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        username,
+                        avatar: profileState.user.avatar || ''
+                    })
+                });
+
+                const cachedUser = auth.getUser() || {};
+                const nextUser = { ...cachedUser, ...response.data };
+                auth.setUser(nextUser);
+                profileState.user = nextUser;
+                profileState.teams = profileState.teams.map((team) => (
+                    team.captainUsername === previousUsername
+                        ? { ...team, captainUsername: nextUser.username }
+                        : team
+                ));
+                renderProfile();
+                showProfileMessage('Profile updated successfully.', 'success');
+            } catch (error) {
+                showProfileMessage(error.message, 'error');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Save Changes';
+            }
+        }
+
+        async function loadPlayerProfile() {
+            const content = document.getElementById('player-profile-content');
+
+            if (!auth.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            content.innerHTML = '<div style="text-align:center;padding:4rem 1rem;color:var(--color-text-secondary);">Loading profile...</div>';
+
+            try {
+                const cachedUser = auth.getUser() || {};
+                const [userResponse, teamResponse, tournamentResponse] = await Promise.all([
+                    apiFetch('/users/me'),
+                    apiFetch('/teams'),
+                    apiFetch('/tournaments')
+                ]);
+
+                const user = { ...cachedUser, ...userResponse.data };
+                const teams = (teamResponse.data || []).filter((team) => team.captainUsername === user.username || team._id === cachedUser.team);
+                const tournaments = (tournamentResponse.data || []).slice(0, 4);
+
+                auth.setUser(user);
+                profileState.user = user;
+                profileState.teams = teams;
+                profileState.tournaments = tournaments;
+
+                renderProfile();
+            } catch (error) {
+                content.innerHTML = `
+                    <section class="section">
+                        <div class="container" style="text-align:center;padding:4rem 1rem;">
+                            <h2 style="color:var(--color-text);margin-bottom:1rem;">Profile Unavailable</h2>
+                            <p style="color:var(--color-primary);margin-bottom:1rem;">${escapeHtml(error.message)}</p>
+                            <a href="index.html" class="btn btn-primary">Back to Home</a>
+                        </div>
+                    </section>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPlayerProfile);
+    </script>
+</body>
+</html>

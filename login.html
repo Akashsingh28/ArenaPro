@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ArenaPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="login-page">
+    <div class="login-bg"></div>
+    
+    <div class="login-container">
+        <div class="login-header">
+            <a href="index.html" class="logo-link">
+                <div class="logo-icon-large">🏆</div>
+                <span class="logo-text-large">ARENA<span class="text-primary">PRO</span></span>
+            </a>
+            <p class="login-subtitle">Join the ultimate esports platform</p>
+        </div>
+
+        <div class="login-card">
+            <div class="card-header">
+                <h2 class="card-title">Welcome Back</h2>
+                <p class="card-description">Sign in to your account or create a new one</p>
+            </div>
+
+            <div class="tabs">
+                <div class="tab-list">
+                    <button class="tab-button active" data-tab="login">Login</button>
+                    <button class="tab-button" data-tab="register">Register</button>
+                    <button class="tab-button" data-tab="admin">Admin</button>
+                </div>
+
+                <!-- Login Tab -->
+                <div class="tab-content active" id="login-tab">
+                    <form class="auth-form" onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">📧</span>
+                                <input type="email" id="email" placeholder="you@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="password" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <span class="btn-text">Sign In</span>
+                            <span class="btn-loading" style="display: none;">Signing in...</span>
+                        </button>
+
+                        <div class="form-footer">
+                            Forgot your password? 
+                            <a href="#" class="link-primary">Reset it</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Register Tab -->
+                <div class="tab-content" id="register-tab">
+                    <form class="auth-form" onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">👤</span>
+                                <input type="text" id="username" placeholder="gamer123" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-email">Email</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">📧</span>
+                                <input type="email" id="register-email" placeholder="you@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-password">Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="register-password" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <span class="btn-text">Create Account</span>
+                            <span class="btn-loading" style="display: none;">Creating account...</span>
+                        </button>
+
+                        <div class="form-footer">
+                            By registering, you agree to our 
+                            <a href="#" class="link-primary">Terms of Service</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Admin Tab -->
+                <div class="tab-content" id="admin-tab">
+                    <form class="auth-form" onsubmit="handleAdminLogin(event)">
+                        <div class="admin-icon-container">
+                            <div class="admin-shield">🛡️</div>
+                        </div>
+                        
+                        <div class="admin-header">
+                            <h3>Admin Access</h3>
+                            <p>Restricted to authorized personnel only</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="admin-email">Admin Email</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">📧</span>
+                                <input type="email" id="admin-email" placeholder="admin@arenapro.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="admin-password">Admin Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="admin-password" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="admin-secret">Secret Key</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">🗝️</span>
+                                <input type="password" id="admin-secret" placeholder="Enter admin secret key" required>
+                            </div>
+                            <p style="font-size:0.75rem;color:var(--color-text-secondary);margin-top:0.4rem;">🔐 Required for admin access</p>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <span class="btn-text">Admin Sign In</span>
+                            <span class="btn-loading" style="display: none;">Verifying...</span>
+                        </button>
+
+                        <div class="form-footer">
+                            🛡️ Secure admin authentication
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.getAttribute('data-tab');
+                
+                // Remove active class from all buttons and contents
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding content
+                button.classList.add('active');
+                document.getElementById(tabName + '-tab').classList.add('active');
+            });
+        });
+
+        // ── Helper: loading state ───────────────────────────────────────────
+        function showLoading(button) {
+            button.disabled = true;
+            button.querySelector('.btn-text').style.display = 'none';
+            button.querySelector('.btn-loading').style.display = 'inline';
+        }
+        function resetButton(button, text) {
+            button.disabled = false;
+            button.querySelector('.btn-text').textContent = text;
+            button.querySelector('.btn-text').style.display = 'inline';
+            button.querySelector('.btn-loading').style.display = 'none';
+        }
+        function showError(msg) {
+            let el = document.getElementById('login-error');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'login-error';
+                el.style.cssText = 'margin-top:1rem;padding:0.75rem 1rem;background:rgba(255,71,87,.15);border:1px solid rgba(255,71,87,.4);border-radius:.5rem;color:#ff4757;font-size:.875rem;text-align:center;';
+                document.querySelector('.login-card').appendChild(el);
+            }
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+        function clearError() {
+            const el = document.getElementById('login-error');
+            if (el) el.style.display = 'none';
+        }
+
+        // ── Login handler ───────────────────────────────────────────────────
+        async function handleLogin(event) {
+            event.preventDefault();
+            clearError();
+
+            const email    = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Client-side validation
+            if (!email) return showError('Please enter your email.');
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Please enter a valid email address.');
+            if (!password) return showError('Please enter your password.');
+            if (password.length < 6) return showError('Password must be at least 6 characters.');
+
+            const button = event.target.querySelector('button[type="submit"]');
+            showLoading(button);
+
+            try {
+                const data = await apiFetch('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+                auth.setToken(data.token);
+                auth.setUser(data.user);
+                window.location.href = 'index.html';
+            } catch (err) {
+                showError(err.message);
+                resetButton(button, 'Sign In');
+            }
+        }
+
+        // ── Register handler ────────────────────────────────────────────────
+        async function handleRegister(event) {
+            event.preventDefault();
+            clearError();
+
+            const username = document.getElementById('username').value.trim();
+            const email    = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+
+            // Client-side validation
+            if (!username) return showError('Please enter a username.');
+            if (username.length < 3) return showError('Username must be at least 3 characters.');
+            if (username.length > 20) return showError('Username must be 20 characters or fewer.');
+            if (!/^[a-zA-Z0-9_]+$/.test(username)) return showError('Username can only contain letters, numbers, and underscores.');
+            if (!email) return showError('Please enter your email.');
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Please enter a valid email address.');
+            if (!password) return showError('Please enter a password.');
+            if (password.length < 6) return showError('Password must be at least 6 characters.');
+
+            const button = event.target.querySelector('button[type="submit"]');
+            showLoading(button);
+
+            try {
+                const data = await apiFetch('/auth/register', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, email, password })
+                });
+                auth.setToken(data.token);
+                auth.setUser(data.user);
+                window.location.href = 'index.html';
+            } catch (err) {
+                showError(err.message);
+                resetButton(button, 'Create Account');
+            }
+        }
+
+        // ── Admin login handler ─────────────────────────────────────────────
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+            clearError();
+
+            const email     = document.getElementById('admin-email').value.trim();
+            const password  = document.getElementById('admin-password').value;
+            const secretKey = document.getElementById('admin-secret').value;
+
+            // Client-side validation
+            if (!email) return showError('Please enter admin email.');
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Please enter a valid email address.');
+            if (!password) return showError('Please enter admin password.');
+            if (!secretKey) return showError('Please enter the secret key.');
+
+            const button = event.target.querySelector('button[type="submit"]');
+            showLoading(button);
+
+            try {
+                const data = await apiFetch('/auth/admin/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password, secretKey })
+                });
+                auth.setToken(data.token);
+                auth.setUser(data.user);
+                window.location.href = 'admin.html';
+            } catch (err) {
+                showError(err.message);
+                resetButton(button, 'Admin Sign In');
+            }
+        }
+    </script>
+</body>
+</html>

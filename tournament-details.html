@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Details - ArenaPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🏆</div>
+                <span class="logo-text">ARENA<span class="text-primary">PRO</span></span>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    Home
+                </a>
+                <a href="tournaments.html" class="nav-link active">
+                    <span class="nav-icon">🏆</span>
+                    Tournaments
+                </a>
+                <div class="nav-dropdown">
+                    <a href="teams.html" class="nav-link">
+                        <span class="nav-icon">👥</span>
+                        Teams
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="teams.html" class="dropdown-item">👥 View All Teams</a>
+                        <a href="create-team.html" class="dropdown-item">➕ Create Team</a>
+                    </div>
+                </div>
+                <a href="leaderboard.html" class="nav-link">
+                    <span class="nav-icon">🏅</span>
+                    Leaderboard
+                </a>
+            </div>
+
+            <a href="login.html" class="btn btn-primary">
+                <span class="nav-icon">🔐</span>
+                Login
+            </a>
+        </div>
+    </nav>
+
+    <!-- Tournament Details Content -->
+    <div id="tournament-details-content">
+        <!-- Content will be loaded here by JavaScript -->
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; Akash Singh</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        async function loadTournamentDetails() {
+            const urlParams    = new URLSearchParams(window.location.search);
+            const tournamentId = urlParams.get('id');                    // MongoDB ObjectId string
+
+            const content = document.getElementById('tournament-details-content');
+            content.innerHTML = '<div style="text-align:center;padding:4rem 1rem;color:var(--color-text-secondary);">Loading tournament...</div>';
+
+            if (!tournamentId) {
+                content.innerHTML = `<section class="section"><div class="container" style="text-align:center;padding:4rem 1rem;"><h2 style="color:var(--color-text);margin-bottom:1rem;">Tournament Not Found</h2><a href="tournaments.html" class="btn btn-primary">Back to Tournaments</a></div></section>`;
+                return;
+            }
+
+            try {
+                const data       = await apiFetch(`/tournaments/${tournamentId}`);
+                const tournament = data.data;
+                const spotsRemaining = tournament.maxTeams - tournament.registeredTeams;
+                const registrationProgress = (tournament.registeredTeams / tournament.maxTeams) * 100;
+                const displayTime = tournament.startTime || '18:00';
+                const displayDateTime = `${new Date(tournament.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} at ${displayTime}`;
+
+                content.innerHTML = `
+                <!-- Hero Section -->
+                <section class="hero">
+                    <div class="hero-bg"></div>
+                    <div class="hero-gradient"></div>
+                    
+                    <div class="container" style="padding: 3rem 1rem; position: relative; z-index: 2;">
+                        <div class="hero-content">
+                            <div style="display: inline-block; padding: 0.5rem 1rem; background-color: rgba(255, 71, 87, 0.1); border: 1px solid var(--color-border); border-radius: 2rem; margin-bottom: 1rem;">
+                                <span style="color: var(--color-primary); font-weight: 600; text-transform: uppercase; font-size: 0.875rem;">
+                                    ${tournament.status === 'open' ? '🟢 Registration Open' : tournament.status === 'ongoing' ? '🔴 Live Now' : '✅ Completed'}
+                                </span>
+                            </div>
+                            <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 1rem;">
+                                ${tournament.name}
+                            </h1>
+                            <p class="hero-description" style="margin-bottom: 1.5rem; font-size: 1.25rem;">
+                                ${tournament.game} • Starts ${displayDateTime}
+                            </p>
+                            ${tournament.status === 'open' ? `
+                                <button type="button" class="btn btn-primary btn-lg register-team-btn" data-tournament-id="${tournament._id}">
+                                    Register Your Team
+                                    <span class="arrow">→</span>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tournament Stats -->
+                <section class="section">
+                    <div class="container">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">💰</div>
+                                <div class="stat-value">₹${tournament.prizePool.toLocaleString()}</div>
+                                <div class="stat-label">Prize Pool</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🎫</div>
+                                <div class="stat-value">${tournament.entryFee === 0 ? 'Free' : '₹' + tournament.entryFee}</div>
+                                <div class="stat-label">Entry Fee</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">👥</div>
+                                <div class="stat-value">${tournament.registeredTeams}/${tournament.maxTeams}</div>
+                                <div class="stat-label">Teams Registered</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">📅</div>
+                                <div class="stat-value">${new Date(tournament.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                                <div class="stat-label">Start Date</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">⏰</div>
+                                <div class="stat-value">${displayTime}</div>
+                                <div class="stat-label">Start Time</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Prize Distribution -->
+                <section class="section">
+                    <div class="container">
+                        <h2 class="section-title" style="text-align: center; margin-bottom: 2rem;">Prize Distribution</h2>
+                        
+                        <div style="max-width: 800px; margin: 0 auto; display: grid; gap: 1rem;">
+                            <div class="tournament-card">
+                                <div class="tournament-content" style="background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="display: flex; align-items: center; gap: 1rem;">
+                                            <div style="font-size: 3rem;">🥇</div>
+                                            <div>
+                                                <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.25rem;">1st Place</h3>
+                                                <p style="color: var(--color-text-secondary);">Champion</p>
+                                            </div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div style="font-size: 2rem; font-weight: 700; color: #FFD700;">₹${Math.floor(tournament.prizePool * 0.5).toLocaleString()}</div>
+                                            <p style="color: var(--color-text-secondary); font-size: 0.875rem;">50% of prize pool</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tournament-card">
+                                <div class="tournament-content" style="background: linear-gradient(90deg, rgba(192, 192, 192, 0.1), transparent);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="display: flex; align-items: center; gap: 1rem;">
+                                            <div style="font-size: 2.5rem;">🥈</div>
+                                            <div>
+                                                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.25rem;">2nd Place</h3>
+                                                <p style="color: var(--color-text-secondary);">Runner-up</p>
+                                            </div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div style="font-size: 1.75rem; font-weight: 700; color: #C0C0C0;">₹${Math.floor(tournament.prizePool * 0.3).toLocaleString()}</div>
+                                            <p style="color: var(--color-text-secondary); font-size: 0.875rem;">30% of prize pool</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tournament-card">
+                                <div class="tournament-content" style="background: linear-gradient(90deg, rgba(205, 127, 50, 0.1), transparent);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="display: flex; align-items: center; gap: 1rem;">
+                                            <div style="font-size: 2rem;">🥉</div>
+                                            <div>
+                                                <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.25rem;">3rd Place</h3>
+                                                <p style="color: var(--color-text-secondary);">Third Position</p>
+                                            </div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div style="font-size: 1.5rem; font-weight: 700; color: #CD7F32;">₹${Math.floor(tournament.prizePool * 0.2).toLocaleString()}</div>
+                                            <p style="color: var(--color-text-secondary); font-size: 0.875rem;">20% of prize pool</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tournament Bracket -->
+                <section class="section">
+                    <div class="container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                            <h2 class="section-title" style="margin-bottom: 0;">Tournament Bracket</h2>
+                            ${localStorage.getItem('role') === 'admin' ? `
+                                <div>
+                                    <button id="generate-bracket-btn" class="btn btn-outline" data-tournament-id="${tournament._id}">Generate Bracket</button>
+                                    <button id="progress-bracket-btn" class="btn btn-primary" style="margin-left: 10px;" data-tournament-id="${tournament._id}">Progress Round</button>
+                                </div>
+                            ` : ''}
+                        </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Registered Teams -->
+                <section class="section">
+                    <div class="container">
+                        <h2 class="section-title" style="text-align: center; margin-bottom: 2rem;">Registered Teams</h2>
+                        
+                        <div style="max-width: 800px; margin: 0 auto;">
+                            <div style="margin-bottom: 1.5rem;">
+                                <div style="background-color: rgba(255, 71, 87, 0.1); border-radius: 0.5rem; height: 8px; overflow: hidden;">
+                                    <div style="height: 100%; background-color: var(--color-primary); width: ${registrationProgress}%; transition: width 0.5s;"></div>
+                                </div>
+                                <p style="text-align: center; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                    ${tournament.registeredTeams} of ${tournament.maxTeams} slots filled • ${spotsRemaining} spots remaining
+                                </p>
+                            </div>
+
+                            <div style="text-align:center;padding:1rem 0;color:var(--color-text-secondary);">
+                                ${tournament.registeredTeams > 0 ? tournament.registeredTeams + ' team(s) registered' : 'No teams registered yet'}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tournament Rules -->
+                <section class="section">
+                    <div class="container">
+                        <h2 class="section-title" style="text-align: center; margin-bottom: 2rem;">Tournament Rules</h2>
+                        
+                        <div style="max-width: 800px; margin: 0 auto;">
+                            <div class="tournament-card">
+                                <div class="tournament-content">
+                                    <div style="display: grid; gap: 1.5rem;">
+                                        <div>
+                                            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                                <span>📋</span> General Rules
+                                            </h3>
+                                            <ul style="color: var(--color-text-secondary); line-height: 1.8; padding-left: 1.5rem;">
+                                                <li>All team members must be registered before the tournament starts</li>
+                                                <li>Teams must check in 30 minutes before the tournament begins</li>
+                                                <li>No substitutions allowed after registration closes</li>
+                                                <li>All participants must follow fair play guidelines</li>
+                                            </ul>
+                                        </div>
+
+                                        <div>
+                                            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                                <span>⚙️</span> Match Settings
+                                            </h3>
+                                            <ul style="color: var(--color-text-secondary); line-height: 1.8; padding-left: 1.5rem;">
+                                                <li>Game Mode: Battle Royale (Squad)</li>
+                                                <li>Match Type: Single Elimination</li>
+                                                <li>Map: Bermuda (Random Drop)</li>
+                                                <li>Match Duration: Standard Game Settings</li>
+                                            </ul>
+                                        </div>
+
+                                        <div>
+                                            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                                <span>🚫</span> Prohibited Actions
+                                            </h3>
+                                            <ul style="color: var(--color-text-secondary); line-height: 1.8; padding-left: 1.5rem;">
+                                                <li>Use of any third-party software or cheats</li>
+                                                <li>Account sharing during the tournament</li>
+                                                <li>Toxic behavior or harassment of other players</li>
+                                                <li>Violation of any rules will result in immediate disqualification</li>
+                                            </ul>
+                                        </div>
+
+                                        <div>
+                                            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                                <span>💰</span> Prize Distribution
+                                            </h3>
+                                            <ul style="color: var(--color-text-secondary); line-height: 1.8; padding-left: 1.5rem;">
+                                                <li>Prizes will be distributed within 7 days of tournament completion</li>
+                                                <li>Winners must provide valid payment information</li>
+                                                <li>All prizes are subject to applicable taxes</li>
+                                                <li>Prize amounts are final and non-negotiable</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CTA Section -->
+                <section class="section">
+                    <div class="container" style="text-align: center;">
+                        ${tournament.status === 'open' ? `
+                            <div style="margin-bottom: 2rem;">
+                                <h2 style="font-size: 2rem; font-family: var(--font-heading); color: var(--color-text); margin-bottom: 1rem;">
+                                    Ready to Compete?
+                                </h2>
+                                <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 2rem;">
+                                    Register your team now and compete for the ₹${tournament.prizePool.toLocaleString()} prize pool!
+                                </p>
+                                <button type="button" class="btn btn-primary btn-lg register-team-btn" data-tournament-id="${tournament._id}">
+                                    Register Your Team
+                                    <span class="arrow">→</span>
+                                </button>
+                            </div>
+                        ` : ''}
+                        <a href="tournaments.html" class="btn btn-outline btn-lg">
+                            ← Back to Tournaments
+                        </a>
+                    </div>
+                </section>
+                `;
+
+                // Render brackets for this tournament
+                await fetchAndRenderBracket(tournament._id);
+            } catch (err) {
+                content.innerHTML = `<div style="text-align:center;padding:4rem 1rem;"><p style="color:var(--color-primary);font-size:1.25rem;">⚠️ ${err.message}</p><p style="color:var(--color-text-secondary);margin:.5rem 0 2rem;">Make sure the backend server is running on port 5000.</p><a href="tournaments.html" class="btn btn-primary">Back to Tournaments</a></div>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTournamentDetails();
+        });
+
+        document.addEventListener('click', async (event) => {
+            const button = event.target.closest('.register-team-btn');
+            if (!button) return;
+
+            if (!auth.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const tournamentId = button.getAttribute('data-tournament-id');
+            if (!tournamentId) return;
+
+            const oldText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = 'Registering...';
+
+            try {
+                const result = await apiFetch(`/tournaments/${tournamentId}/register`, { method: 'POST' });
+                alert(result.message || 'Team registered successfully');
+                await loadTournamentDetails();
+            } catch (error) {
+                if (error.code === 'TEAM_REQUIRED') {
+                    alert('You need to create a team first. Redirecting to Create Team page...');
+                    window.location.href = 'create-team.html';
+                    return;
+                }
+                alert(error.message);
+                button.disabled = false;
+                button.innerHTML = oldText;
+            }
+        });
+
+        document.addEventListener('click', async (event) => {
+            const btn = event.target.closest('#generate-bracket-btn');
+            if (btn) {
+                const tId = btn.getAttribute('data-tournament-id');
+                if(!tId) return;
+
+                if(!confirm('Are you sure you want to generate the bracket? This cannot be undone.')) return;
+
+                const oldText = btn.innerHTML;
+                btn.innerHTML = 'Generating...';
+                btn.disabled = true;
+
+                try {
+                    const res = await apiFetch(`/tournaments/${tId}/generate-bracket`, { method: 'POST' });
+                    alert(res.message || 'Bracket generated!');
+                    await fetchAndRenderBracket(tId);
+                } catch (err) {
+                    alert(err.message || 'Failed to generate bracket.');
+                } finally {
+                    btn.innerHTML = oldText;
+                    btn.disabled = false;
+                }
+                return;
+            }
+            
+            const progBtn = event.target.closest('#progress-bracket-btn');
+            if (progBtn) {
+                const tId = progBtn.getAttribute('data-tournament-id');
+                if(!tId) return;
+
+                if(!confirm('Are you sure you want to progress to the next round? All current round matches must be completed.')) return;
+
+                const oldText = progBtn.innerHTML;
+                progBtn.innerHTML = 'Progressing...';
+                progBtn.disabled = true;
+
+                try {
+                    const res = await apiFetch(`/tournaments/${tId}/progress-bracket`, { method: 'POST' });
+                    alert(res.message || 'Bracket progressed!');
+                    await fetchAndRenderBracket(tId);
+                } catch (err) {
+                    alert(err.message || 'Failed to progress bracket.');
+                } finally {
+                    progBtn.innerHTML = oldText;
+                    progBtn.disabled = false;
+                }
+            }
+        });
+
+        // Bracket rendering logic
+        async function fetchAndRenderBracket(tournamentId) {
+            const bracketContainer = document.getElementById('dynamic-bracket');
+            if (!bracketContainer) return;
+            
+            try {
+                const response = await apiFetch(`/matches?tournament=${tournamentId}`);
+                const matches = response.data || [];
+                
+                if (matches.length === 0) {
+                    bracketContainer.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--color-text-secondary);">Bracket not generated yet. Bracket will be available once the tournament starts.</div>';
+                    return;
+                }
+
+                // Group by round
+                const rounds = {};
+                matches.forEach(m => {
+                    const r = m.round || 'Round 1';
+                    if(!rounds[r]) rounds[r] = [];
+                    rounds[r].push(m);
+                });
+
+                let html = '';
+                Object.keys(rounds).forEach(roundName => {
+                    const roundMatches = rounds[roundName];
+                    html += `
+                        <div class="bracket-round">
+                            <h3 class="bracket-round-title">${roundName}</h3>
+                            <div class="bracket-matches">
+                    `;
+                    
+                    roundMatches.forEach(m => {
+                        const t1Winner = m.winner && m.winner === m.team1 ? 'winner' : '';
+                        const t2Winner = m.winner && m.winner === m.team2 ? 'winner' : '';
+
+                        html += `
+                            <div class="bracket-match">
+                                <div class="bracket-team ${t1Winner}">
+                                    <span class="team-name">${m.team1Name || 'TBD'}</span>
+                                    <span class="team-score">${m.status === 'completed' && t1Winner ? 'W' : ''}</span>
+                                </div>
+                                <div class="bracket-team ${t2Winner}">
+                                    <span class="team-name">${m.team2Name || 'TBD'}</span>
+                                    <span class="team-score">${m.status === 'completed' && t2Winner ? 'W' : ''}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+
+                bracketContainer.innerHTML = html;
+            } catch (err) {
+                bracketContainer.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--color-primary);">Error loading bracket: ${err.message}</div>`;
+            }
+        }
+    </script>
+
+    <style>
+        .bracket-container {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            overflow-x: auto;
+            padding: 2rem 0;
+        }
+
+        .bracket-round {
+            display: flex;
+            flex-direction: column;
+            min-width: 250px;
+        }
+
+        .bracket-round-title {
+            font-family: var(--font-heading);
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .bracket-matches {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .bracket-match {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .bracket-team {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bracket-team:last-child {
+            border-bottom: none;
+        }
+
+        .bracket-team.winner {
+            background-color: rgba(255, 71, 87, 0.1);
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .bracket-team.champion {
+            background-color: rgba(255, 215, 0, 0.1);
+            border-left: 3px solid #FFD700;
+        }
+
+        .team-name {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .team-score {
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        @media (max-width: 768px) {
+            .bracket-container {
+                flex-direction: column;
+            }
+
+            .bracket-round {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>

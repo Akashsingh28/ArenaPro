@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams - ArenaPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🏆</div>
+                <span class="logo-text">ARENA<span class="text-primary">PRO</span></span>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    Home
+                </a>
+                <a href="tournaments.html" class="nav-link">
+                    <span class="nav-icon">🏆</span>
+                    Tournaments
+                </a>
+                <div class="nav-dropdown">
+                    <a href="teams.html" class="nav-link active">
+                        <span class="nav-icon">👥</span>
+                        Teams
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="teams.html" class="dropdown-item">👥 View All Teams</a>
+                        <a href="create-team.html" class="dropdown-item">➕ Create Team</a>
+                    </div>
+                </div>
+                <a href="leaderboard.html" class="nav-link">
+                    <span class="nav-icon">🏅</span>
+                    Leaderboard
+                </a>
+                <a href="#" class="nav-link" id="nav-notifications-btn" onclick="toggleNotifications(event)">
+                    <span class="nav-icon">🔔</span>
+                    <span id="nav-notif-count" style="background:#ff4757;color:#fff;border-radius:50%;padding:2px 6px;font-size:0.7rem;position:absolute;top:5px;right:5px;display:none;">0</span>
+                    Alerts
+                </a>
+            </div>
+
+            <a href="login.html" class="btn btn-primary">
+                <span class="nav-icon">🔐</span>
+                Login
+            </a>
+        </div>
+        
+        <!-- Notifications Dropdown -->
+        <div id="notifications-dropdown" style="display:none;position:absolute;top:70px;right:20px;width:300px;background:var(--color-card);border:1px solid var(--color-border);border-radius:10px;box-shadow:0 10px 15px -3px rgba(0,0,0,0.5);z-index:9999;max-height:400px;overflow-y:auto;padding:1rem;">
+            <h3 style="font-size:1rem;margin-bottom:1rem;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:0.5rem;">Notifications</h3>
+            <div id="notifications-list" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="text-align:center;color:var(--color-text-secondary);font-size:0.875rem;">Loading...</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-gradient"></div>
+        
+        <div class="container" style="padding: 3rem 1rem;">
+            <div class="hero-content">
+                <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 1rem;">
+                    <span class="text-primary glow">Teams</span>
+                </h1>
+                <p class="hero-description" style="margin-bottom: 1.5rem;">
+                    Browse teams or create your own squad
+                </p>
+                <a href="create-team.html" class="btn btn-primary btn-lg">
+                    Create Team
+                    <span class="arrow">→</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Teams List -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">All Teams</h2>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div style="display:flex; gap:1rem; margin-bottom: 2rem;">
+                <input type="text" id="team-search" oninput="debounceSearch()" placeholder="Search teams by name..." style="flex:1; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--color-card); border: 1px solid var(--color-border); color: #fff;">
+            </div>
+
+            <div id="teams-list" class="tournaments-grid">
+                <!-- Teams will be loaded here by JavaScript -->
+            </div>
+            
+            <!-- Pagination Controls -->
+            <div id="pagination-controls" style="display:flex; justify-content:center; gap:1rem; margin-top:2rem;">
+                <button class="btn btn-outline" id="prev-page" onclick="changePage(-1)" disabled>Previous</button>
+                <div style="display:flex; align-items:center; color:var(--color-text-secondary);" id="page-indicator">Page 1</div>
+                <button class="btn btn-outline" id="next-page" onclick="changePage(1)" disabled>Next</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; Akash Singh</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let currentPage = 1;
+        let limit = 6;
+        let searchTimeout = null;
+        let totalPages = 1;
+
+        function debounceSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentPage = 1;
+                loadTeams();
+            }, 500);
+        }
+
+        function changePage(delta) {
+            const newPage = currentPage + delta;
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                loadTeams();
+            }
+        }
+
+        // Load teams from the API
+        async function loadTeams() {
+            const container = document.getElementById('teams-list');
+            const searchQ = document.getElementById('team-search').value;
+            container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--color-text-secondary);grid-column: 1 / -1;">Loading teams...</div>';
+
+            try {
+                const data  = await apiFetch(`/teams?page=${currentPage}&limit=${limit}&search=${encodeURIComponent(searchQ)}`);
+                const teams = data.data;
+                const pag = data.pagination || { pages: 1 };
+                totalPages = pag.pages;
+
+                document.getElementById('page-indicator').textContent = `Page ${currentPage} of ${Math.max(1, totalPages)}`;
+                document.getElementById('prev-page').disabled = currentPage <= 1;
+                document.getElementById('next-page').disabled = currentPage >= totalPages;
+
+                if (teams.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--color-text-secondary);grid-column: 1 / -1;">No teams found.</div>';
+                    return;
+                }
+
+                container.innerHTML = teams.map(team => `
+                    <div class="tournament-card">
+                        <div class="tournament-accent"></div>
+                        <div class="tournament-content">
+                            <div class="tournament-header">
+                                <div style="display:flex;align-items:center;gap:1rem;">
+                                    <div style="display:flex;align-items:center;justify-content:center;width:3rem;height:3rem;border-radius:.5rem;background-color:rgba(255,71,87,.1);border:1px solid var(--color-border);font-size:1.5rem;">
+                                        ${team.logo}
+                                    </div>
+                                    <div>
+                                        <h3 class="tournament-name">${team.name}</h3>
+                                        <p class="tournament-game">${team.game}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tournament-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Captain</span>
+                                    <span class="detail-value">${team.captainUsername || 'N/A'}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Members</span>
+                                    <span class="detail-value">${(team.memberUsernames || []).length}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Rank</span>
+                                    <span class="detail-value primary">#${team.rank || '-'}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Points</span>
+                                    <span class="detail-value">${team.points || 0}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">W/L</span>
+                                    <span class="detail-value">${team.wins || 0}/${team.losses || 0}</span>
+                                </div>
+                            </div>
+                            <a href="team-profile.html?id=${team._id}" class="btn btn-outline btn-full">View Team</a>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--color-primary);">⚠️ ${err.message}<br><small style="color:var(--color-text-secondary)">Make sure the backend server is running on port 5000.</small></div>`;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTeams();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ArenaPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="display: none;">
+    <script>
+        // Synchronous unauthenticated check for fast fail
+        if (!localStorage.getItem('ap_token')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🏆</div>
+                <span class="logo-text">ARENA<span class="text-primary">PRO</span></span>
+            </a>
+
+            <div class="nav-links">
+                <a href="admin.html" class="nav-link active">
+                    <span class="nav-icon">🛡️</span>
+                    Dashboard
+                </a>
+                <a href="#tournaments" class="nav-link">
+                    <span class="nav-icon">🏆</span>
+                    Tournaments
+                </a>
+                <a href="#teams" class="nav-link">
+                    <span class="nav-icon">👥</span>
+                    Teams
+                </a>
+                <a href="#users" class="nav-link">
+                    <span class="nav-icon">👤</span>
+                    Users
+                </a>
+            </div>
+
+            <a href="login.html" class="btn btn-outline" id="admin-logout-btn">
+                <span class="nav-icon">🚪</span>
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Admin Header -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-gradient"></div>
+        
+        <div class="container" style="padding: 3rem 1rem;">
+            <div class="hero-content">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
+                    <div style="font-size: 3rem;">🛡️</div>
+                    <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 0;">
+                        Admin <span class="text-primary glow">Dashboard</span>
+                    </h1>
+                </div>
+                <p class="hero-description" style="margin-bottom: 0;">
+                    Manage tournaments, teams, and users
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Overview Stats -->
+    <section class="section" id="dashboard">
+        <div class="container">
+            <h2 class="section-title" style="margin-bottom: 2rem;">Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Active Tournaments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value">150</div>
+                    <div class="stat-label">Total Teams</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👤</div>
+                    <div class="stat-value">600</div>
+                    <div class="stat-label">Registered Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value">₹5L+</div>
+                    <div class="stat-label">Total Prize Pool</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tournament Management -->
+    <section class="section" id="tournaments">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Tournament Management</h2>
+                <button class="btn btn-primary" onclick="openCreateTournamentModal()">
+                    + Create Tournament
+                </button>
+            </div>
+
+            <div class="admin-table">
+                <div class="table-header">
+                    <div class="table-cell" style="flex: 2;">Tournament Name</div>
+                    <div class="table-cell" style="width: 120px;">Game</div>
+                    <div class="table-cell" style="width: 100px;">Teams</div>
+                    <div class="table-cell" style="width: 120px;">Prize Pool</div>
+                    <div class="table-cell" style="width: 100px;">Status</div>
+                    <div class="table-cell" style="width: 230px;">Actions</div>
+                </div>
+                <div id="admin-tournaments-list">
+                    <!-- Tournaments loaded by JS -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Management -->
+    <section class="section" id="teams">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Team Management</h2>
+                <button class="btn btn-outline" onclick="loadAdminTeams()">Refresh Teams</button>
+            </div>
+
+            <div class="admin-table">
+                <div class="table-header">
+                    <div class="table-cell" style="flex: 2;">Team</div>
+                    <div class="table-cell" style="width: 130px;">Game</div>
+                    <div class="table-cell" style="width: 100px;">Points</div>
+                    <div class="table-cell" style="width: 170px;">Moderation Status</div>
+                    <div class="table-cell" style="width: 160px;">Actions</div>
+                </div>
+                <div id="admin-teams-list"></div>
+            </div>
+
+            <div class="admin-note-card">
+                <h3>Send Notification</h3>
+                <p>Push a platform notification for all players from the admin dashboard.</p>
+                <div class="notify-grid">
+                    <input id="notify-title" type="text" placeholder="Notification title" />
+                    <input id="notify-message" type="text" placeholder="Write message for users" />
+                </div>
+                <div class="notify-actions">
+                    <button class="btn btn-primary" onclick="sendGlobalNotification()">Send Notification</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- User Management -->
+    <section class="section" id="users">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Recent Users</h2>
+                <a href="#all-users" class="btn btn-outline">View All</a>
+            </div>
+
+            <div class="admin-table">
+                <div class="table-header">
+                    <div class="table-cell" style="flex: 2;">Username</div>
+                    <div class="table-cell" style="width: 200px;">Email</div>
+                    <div class="table-cell" style="width: 120px;">Team</div>
+                    <div class="table-cell" style="width: 100px;">Status</div>
+                    <div class="table-cell" style="width: 120px;">Actions</div>
+                </div>
+                <div id="admin-users-list">
+                    <div style="padding:1rem;color:var(--color-text-secondary);">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; Akash Singh</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // ── Load dashboard stats ────────────────────────────────────────────
+        async function loadStats() {
+            try {
+                const data = await apiFetch('/admin/stats');
+                const s = data.data;
+                const statValues = document.querySelectorAll('.stat-value');
+                if (statValues.length >= 4) {
+                    statValues[0].textContent = s.tournaments;
+                    statValues[1].textContent = s.teams;
+                    statValues[2].textContent = s.users;
+                    statValues[3].textContent = s.totalPrize >= 100000
+                        ? '₹' + (s.totalPrize / 100000).toFixed(1) + 'L+'
+                        : '₹' + s.totalPrize.toLocaleString();
+                }
+            } catch {
+                // Keep hardcoded values if stats fail (e.g. first run)
+            }
+        }
+
+        // ── Load tournaments table ──────────────────────────────────────────
+        async function loadAdminTournaments() {
+            const container = document.getElementById('admin-tournaments-list');
+            container.innerHTML = '<div style="padding:1rem;color:var(--color-text-secondary);">Loading...</div>';
+
+            try {
+                const data = await apiFetch('/tournaments');
+                const tournaments = data.data;
+
+                if (tournaments.length === 0) {
+                    container.innerHTML = '<div style="padding:1rem;color:var(--color-text-secondary);">No tournaments yet. Create one!</div>';
+                    return;
+                }
+
+                container.innerHTML = tournaments.map(t => `
+                    <div class="table-row">
+                        <div class="table-cell" style="flex:2;font-weight:600;">${t.name}</div>
+                        <div class="table-cell" style="width:120px;color:var(--color-text-secondary);">${t.game}</div>
+                        <div class="table-cell" style="width:100px;">${t.registeredTeams}/${t.maxTeams}</div>
+                        <div class="table-cell" style="width:120px;color:var(--color-primary);font-weight:600;">₹${t.prizePool.toLocaleString()}</div>
+                        <div class="table-cell" style="width:100px;">
+                            <span class="status-badge ${t.status}">${t.status}</span>
+                        </div>
+                        <div class="table-cell" style="width:230px;gap:.5rem;">
+                            <button class="action-btn" title="Edit" onclick="editTournament('${t._id}')">✏️</button>
+                            <button class="action-btn" title="View" onclick="window.location='tournament-details.html?id=${t._id}'">👁️</button>
+                            <button class="action-btn" title="Open" onclick="quickSetTournamentStatus('${t._id}', 'open', '${t.name.replace(/'/g, "\\'")}')">🟢</button>
+                            <button class="action-btn" title="Close" onclick="quickSetTournamentStatus('${t._id}', 'closed', '${t.name.replace(/'/g, "\\'")}')">🔴</button>
+                            <button class="action-btn" title="Delete" onclick="deleteTournament('${t._id}', '${t.name}')">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = `<div style="padding:1rem;color:var(--color-primary);">Error: ${err.message}</div>`;
+            }
+        }
+
+        // ── Create tournament modal ─────────────────────────────────────────
+        function openCreateTournamentModal() {
+            const modal = document.createElement('div');
+            modal.id = 'create-tournament-modal';
+            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1rem;';
+            modal.innerHTML = `
+                <div style="background:var(--color-card);border:1px solid var(--color-border);border-radius:1rem;padding:2rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;">
+                    <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:1.5rem;">Create Tournament</h2>
+                    <form id="ct-form">
+                        <div class="form-group"><label>Name *</label><div class="input-wrapper"><span class="input-icon">🏆</span><input id="ct-name" type="text" placeholder="Tournament name" required></div></div>
+                        <div class="form-group"><label>Game *</label><div class="input-wrapper"><span class="input-icon">🎮</span><select id="ct-game" required><option value="">Select game</option><option>Free Fire</option><option>BGMI</option><option>Valorant</option><option>COD Mobile</option><option>Clash of Clans</option></select></div></div>
+                        <div class="form-group"><label>Prize Pool (₹) *</label><div class="input-wrapper"><span class="input-icon">💰</span><input id="ct-prize" type="number" min="0" placeholder="50000" required></div></div>
+                        <div class="form-group"><label>Entry Fee (₹)</label><div class="input-wrapper"><span class="input-icon">🎫</span><input id="ct-fee" type="number" min="0" placeholder="0 for free"></div></div>
+                        <div class="form-group"><label>Max Teams *</label><div class="input-wrapper"><span class="input-icon">👥</span><input id="ct-max" type="number" min="2" placeholder="64" required></div></div>
+                        <div class="form-group"><label>Date *</label><div class="input-wrapper"><span class="input-icon">📅</span><input id="ct-date" type="date" required></div></div>
+                        <div class="form-group"><label>Start Time *</label><div class="input-wrapper"><span class="input-icon">⏰</span><input id="ct-time" type="time" value="18:00" required></div></div>
+                        <div class="form-group"><label>Description</label><textarea id="ct-desc" rows="3" style="width:100%;padding:.75rem;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:.5rem;color:var(--color-text);font-family:var(--font-body);resize:vertical;" placeholder="Optional description..."></textarea></div>
+                        <div id="ct-error" style="display:none;margin-bottom:1rem;padding:.75rem;background:rgba(255,71,87,.15);border:1px solid rgba(255,71,87,.4);border-radius:.5rem;color:#ff4757;font-size:.875rem;"></div>
+                        <div style="display:flex;gap:1rem;">
+                            <button type="submit" class="btn btn-primary btn-full">Create Tournament</button>
+                            <button type="button" class="btn btn-outline btn-full" onclick="document.getElementById('create-tournament-modal').remove()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            document.getElementById('ct-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const err = document.getElementById('ct-error');
+                err.style.display = 'none';
+                try {
+                    await apiFetch('/tournaments', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            name:        document.getElementById('ct-name').value,
+                            game:        document.getElementById('ct-game').value,
+                            prizePool:   document.getElementById('ct-prize').value,
+                            entryFee:    document.getElementById('ct-fee').value || 0,
+                            maxTeams:    document.getElementById('ct-max').value,
+                            date:        document.getElementById('ct-date').value,
+                            startTime:   document.getElementById('ct-time').value || '18:00',
+                            description: document.getElementById('ct-desc').value
+                        })
+                    });
+                    modal.remove();
+                    loadAdminTournaments();
+                    loadStats();
+                } catch (error) {
+                    err.textContent = error.message;
+                    err.style.display = 'block';
+                }
+            });
+        }
+
+        // ── Edit tournament ─────────────────────────────────────────────────
+        async function editTournament(id) {
+            try {
+                const data = await apiFetch(`/tournaments/${id}`);
+                const t = data.data;
+
+                const modal = document.createElement('div');
+                modal.id = 'edit-tournament-modal';
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1rem;';
+                modal.innerHTML = `
+                    <div style="background:var(--color-card);border:1px solid var(--color-border);border-radius:1rem;padding:2rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;">
+                        <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:1.5rem;">Edit Tournament</h2>
+                        <form id="et-form">
+                            <div class="form-group"><label>Status</label><div class="input-wrapper"><span class="input-icon">🔄</span><select id="et-status"><option value="open" ${t.status==='open'?'selected':''}>Open</option><option value="ongoing" ${t.status==='ongoing'?'selected':''}>Ongoing</option><option value="closed" ${t.status==='closed'?'selected':''}>Closed</option><option value="completed" ${t.status==='completed'?'selected':''}>Completed</option></select></div></div>
+                            <div class="form-group"><label>Start Time</label><div class="input-wrapper"><span class="input-icon">⏰</span><input id="et-time" type="time" value="${t.startTime || '18:00'}"></div></div>
+                            <div class="form-group"><label>Prize Pool (₹)</label><div class="input-wrapper"><span class="input-icon">💰</span><input id="et-prize" type="number" value="${t.prizePool}"></div></div>
+                            <div class="form-group"><label>Max Teams</label><div class="input-wrapper"><span class="input-icon">👥</span><input id="et-max" type="number" value="${t.maxTeams}"></div></div>
+                            <div id="et-error" style="display:none;margin-bottom:1rem;padding:.75rem;background:rgba(255,71,87,.15);border:1px solid rgba(255,71,87,.4);border-radius:.5rem;color:#ff4757;font-size:.875rem;"></div>
+                            <div style="display:flex;gap:1rem;">
+                                <button type="submit" class="btn btn-primary btn-full">Save Changes</button>
+                                <button type="button" class="btn btn-outline btn-full" onclick="document.getElementById('edit-tournament-modal').remove()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+
+                document.getElementById('et-form').addEventListener('submit', async (ev) => {
+                    ev.preventDefault();
+                    const errEl = document.getElementById('et-error');
+                    errEl.style.display = 'none';
+                    try {
+                        await apiFetch(`/tournaments/${id}`, {
+                            method: 'PUT',
+                            body: JSON.stringify({
+                                status:    document.getElementById('et-status').value,
+                                startTime: document.getElementById('et-time').value || '18:00',
+                                prizePool: document.getElementById('et-prize').value,
+                                maxTeams:  document.getElementById('et-max').value
+                            })
+                        });
+                        modal.remove();
+                        loadAdminTournaments();
+                        if (t.status !== document.getElementById('et-status').value) {
+                            await notifyStatusChange(t, document.getElementById('et-status').value);
+                        }
+                    } catch (error) {
+                        errEl.textContent = error.message;
+                        errEl.style.display = 'block';
+                    }
+                });
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // ── Delete tournament ───────────────────────────────────────────────
+        async function deleteTournament(id, name) {
+            if (!confirm(`Delete tournament "${name}"? This cannot be undone.`)) return;
+            try {
+                await apiFetch(`/tournaments/${id}`, { method: 'DELETE' });
+                loadAdminTournaments();
+                loadStats();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // ── Quick tournament controls ───────────────────────────────────────
+        async function quickSetTournamentStatus(id, nextStatus, tournamentName) {
+            try {
+                await apiFetch(`/tournaments/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status: nextStatus })
+                });
+                await apiFetch('/admin/notifications', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        title: `Tournament ${nextStatus.toUpperCase()}`,
+                        message: `${tournamentName} is now ${nextStatus}.`
+                    })
+                });
+                loadAdminTournaments();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        async function notifyStatusChange(tournament, nextStatus) {
+            try {
+                await apiFetch('/admin/notifications', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        title: 'Tournament Status Updated',
+                        message: `${tournament.name} status changed to ${nextStatus}.`
+                    })
+                });
+            } catch {
+                // Non-blocking notification write
+            }
+        }
+
+        // ── Teams moderation ────────────────────────────────────────────────
+        async function loadAdminTeams() {
+            const container = document.getElementById('admin-teams-list');
+            container.innerHTML = '<div style="padding:1rem;color:var(--color-text-secondary);">Loading teams...</div>';
+
+            try {
+                const data = await apiFetch('/teams');
+                const teams = data.data || [];
+
+                if (teams.length === 0) {
+                    container.innerHTML = '<div style="padding:1rem;color:var(--color-text-secondary);">No teams found.</div>';
+                    return;
+                }
+
+                container.innerHTML = teams.map(team => `
+                    <div class="table-row">
+                        <div class="table-cell" style="flex:2;font-weight:600;">${team.name}</div>
+                        <div class="table-cell" style="width:130px;color:var(--color-text-secondary);">${team.game}</div>
+                        <div class="table-cell" style="width:100px;">${team.points || 0}</div>
+                        <div class="table-cell" style="width:170px;">
+                            <select class="admin-select" id="team-status-${team._id}">
+                                <option value="active" ${(team.status || 'active') === 'active' ? 'selected' : ''}>active</option>
+                                <option value="warning" ${team.status === 'warning' ? 'selected' : ''}>warning</option>
+                                <option value="under_review" ${team.status === 'under_review' ? 'selected' : ''}>under_review</option>
+                                <option value="disqualified" ${team.status === 'disqualified' ? 'selected' : ''}>disqualified</option>
+                            </select>
+                        </div>
+                        <div class="table-cell" style="width:160px;gap:.5rem;">
+                            <button class="action-btn" title="Update Status" onclick="updateTeamStatus('${team._id}', '${team.name.replace(/'/g, "\\'")}')">💾</button>
+                            <button class="action-btn" title="Delete Team" onclick="deleteTeam('${team._id}', '${team.name.replace(/'/g, "\\'")}')">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = `<div style="padding:1rem;color:var(--color-primary);">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function updateTeamStatus(teamId, teamName) {
+            const statusInput = document.getElementById(`team-status-${teamId}`);
+            const status = statusInput ? statusInput.value : 'active';
+
+            try {
+                await apiFetch(`/teams/${teamId}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status })
+                });
+                await apiFetch('/admin/notifications', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        title: 'Team Status Updated',
+                        message: `${teamName} is now marked as ${status}.`
+                    })
+                });
+                alert(`Team status updated: ${teamName} -> ${status}`);
+                loadAdminTeams();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function deleteTeam(teamId, teamName) {
+            if (!confirm(`Delete team "${teamName}"? This cannot be undone.`)) return;
+
+            try {
+                await apiFetch(`/teams/${teamId}`, { method: 'DELETE' });
+                await apiFetch('/admin/notifications', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        title: 'Team Removed',
+                        message: `${teamName} has been removed by admin.`
+                    })
+                });
+                loadAdminTeams();
+                loadStats();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function sendGlobalNotification() {
+            const titleInput = document.getElementById('notify-title');
+            const messageInput = document.getElementById('notify-message');
+            const title = (titleInput.value || '').trim();
+            const message = (messageInput.value || '').trim();
+
+            if (!title || !message) {
+                alert('Please provide both title and message.');
+                return;
+            }
+
+            try {
+                await apiFetch('/admin/notifications', {
+                    method: 'POST',
+                    body: JSON.stringify({ title, message })
+                });
+                titleInput.value = '';
+                messageInput.value = '';
+                alert('Notification sent successfully.');
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // ── Users moderation ────────────────────────────────────────────────
+        async function loadAdminUsers() {
+            const container = document.getElementById('admin-users-list');
+            container.innerHTML = '<div style="padding:1rem;color:var(--color-text-secondary);">Loading users...</div>';
+
+            try {
+                const data = await apiFetch('/admin/users');
+                const users = data.data || [];
+
+                if (users.length === 0) {
+                    container.innerHTML = '<div style="padding:1rem;color:var(--color-text-secondary);">No users found.</div>';
+                    return;
+                }
+
+                container.innerHTML = users.map(user => {
+                    const teamName = user.team && user.team.name ? user.team.name : 'No Team';
+                    const statusClass = user.isBanned ? 'status-badge closed' : 'status-badge open';
+                    const statusText = user.isBanned ? 'Banned' : 'Active';
+                    return `
+                    <div class="table-row">
+                        <div class="table-cell" style="flex: 2; font-weight: 600;">${user.username}</div>
+                        <div class="table-cell" style="width: 200px; color: var(--color-text-secondary);">${user.email}</div>
+                        <div class="table-cell" style="width: 120px;">${teamName}</div>
+                        <div class="table-cell" style="width: 100px;">
+                            <span class="${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="table-cell" style="width: 120px; gap: 0.5rem;">
+                            <button class="action-btn" title="View/Edit" onclick="viewUser('${user._id}')">✏️</button>
+                            <button class="action-btn" title="Ban/Unban User" onclick="toggleBanUser('${user._id}', '${user.username.replace(/'/g, "\\'")}', ${!!user.isBanned})">🚫</button>
+                        </div>
+                    </div>
+                `;}).join('');
+            } catch (error) {
+                container.innerHTML = `<div style="padding:1rem;color:var(--color-primary);">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function toggleBanUser(userId, username, isCurrentlyBanned) {
+            const action = isCurrentlyBanned ? 'unban' : 'ban';
+            if (!confirm(`Are you sure you want to ${action} user "${username}"?`)) return;
+
+            try {
+                const data = await apiFetch(`/admin/users/${userId}/ban`, { method: 'PUT' });
+                // We show an alert so admin knows it succeeded
+                alert(data.message || `User ${username} updated.`);
+                loadAdminUsers();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function viewUser(userId) {
+            alert("Viewing user: " + userId + ". (Detailed edit view coming soon!)");
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Redirect non-admins securely and quickly
+            if (!auth.isAdmin()) {
+                alert('Admin access required. Please login as admin.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Server-side verification for true security
+            const isReallyAdmin = await auth.verifyAdminAuth();
+            if (!isReallyAdmin) {
+                alert('Session expired or unauthorized.');
+                auth.logout('login.html');
+                return;
+            }
+
+            document.body.style.display = 'block';
+
+            const logoutButton = document.getElementById('admin-logout-btn');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    auth.logout('login.html');
+                });
+            }
+
+            loadAdminTournaments();
+            loadAdminTeams();
+            loadAdminUsers();
+            loadStats();
+        });
+    </script>
+
+    <style>
+        .admin-table {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .table-header,
+        .table-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .table-header {
+            padding: 0.95rem 1rem;
+            background-color: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--color-border);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--color-text-secondary);
+            font-weight: 700;
+        }
+
+        .table-row {
+            padding: 0.95rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .table-cell {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.open {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge.ongoing {
+            background-color: rgba(255, 71, 87, 0.1);
+            color: var(--color-primary);
+            border: 1px solid var(--color-border);
+        }
+
+        .status-badge.completed {
+            background-color: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+            border: 1px solid rgba(107, 114, 128, 0.3);
+        }
+
+        .status-badge.closed {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        .status-badge.active {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .admin-select {
+            width: 100%;
+            padding: 0.45rem 0.55rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 0.45rem;
+            color: var(--color-text);
+            font-family: var(--font-body);
+            font-size: 0.82rem;
+        }
+
+        .admin-note-card {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--color-border);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .admin-note-card h3 {
+            margin: 0 0 0.35rem;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .admin-note-card p {
+            margin: 0;
+            color: var(--color-text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .notify-grid {
+            margin-top: 0.8rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 0.75rem;
+        }
+
+        .notify-grid input {
+            width: 100%;
+            padding: 0.65rem 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(0, 0, 0, 0.25);
+            color: var(--color-text);
+            font-family: var(--font-body);
+        }
+
+        .notify-actions {
+            margin-top: 0.8rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            padding: 0.375rem 0.625rem;
+            background-color: rgba(255, 71, 87, 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .action-btn:hover {
+            background-color: rgba(255, 71, 87, 0.2);
+            border-color: var(--color-primary);
+        }
+
+        @media (max-width: 960px) {
+            .table-header {
+                display: none;
+            }
+
+            .table-row {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 0.4rem;
+            }
+
+            .table-cell {
+                width: auto !important;
+            }
+
+            .notify-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>
