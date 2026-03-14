@@ -15,7 +15,7 @@ app.use(cors());
 app.use(morgan("dev")); // Terminal logging
 
 /* ---------------- MONGODB CONNECTION ---------------- */
-const DB_URI = process.env.MONGO_URI || "mongodb+srv://akashsingh2882005:Akash%402005M@cluster0.u9hz4.mongodb.net/arenapro?retryWrites=true&w=majority";
+const DB_URI = process.env.MONGO_URI || "mongodb+srv://akashsingh2882005:azDjnx6LfEnv82@cluster0.u9hz4.mongodb.net/arenapro?retryWrites=true&w=majority";
 mongoose.connect(DB_URI)
 .then(()=>console.log("✅ MongoDB Atlas Connected"))
 .catch(err=>{
