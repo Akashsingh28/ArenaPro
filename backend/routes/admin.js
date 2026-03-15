@@ -50,7 +50,7 @@ router.get('/users', async (req, res) => {
     const skip = (page - 1) * limit;
 
     const users = await User.find(filter)
-      .populate('team', 'name')
+      .populate({ path: 'team', select: 'name', strictPopulate: false })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);

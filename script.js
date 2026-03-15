@@ -120,7 +120,7 @@ function updateNavbar() {
                 const profileBtn = document.createElement('a');
                 profileBtn.className = 'btn btn-primary';
                 profileBtn.href = user.role === 'admin' ? 'admin.html' : 'player-profile.html';
-                profileBtn.innerHTML = `<span class="nav-icon">👤</span> Profile`;
+                profileBtn.innerHTML = `<span class="nav-icon">👤</span> ${user.username}`;
                 
                 const logoutBtn = document.createElement('a');
                 logoutBtn.className = 'btn btn-outline';
