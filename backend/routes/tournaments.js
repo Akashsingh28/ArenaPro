@@ -130,7 +130,7 @@ router.post('/', protect, adminOnly, async (req, res) => {
       prizePool: nPrizePool,
       entryFee:  nEntryFee,
       maxTeams:  nMaxTeams,
-
+    });
     res.status(201).json({ success: true, data: tournament });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
