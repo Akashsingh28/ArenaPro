@@ -10,7 +10,8 @@ const app = express();
 const JWT_SECRET    = process.env.JWT_SECRET || "arenapro_secret_key_2026";
 const ADMIN_SECRET  = process.env.ADMIN_SECRET || "ARENA@ADMIN2026";   // ← Admin secret key
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors());
 app.use(morgan("dev")); // Terminal logging
 

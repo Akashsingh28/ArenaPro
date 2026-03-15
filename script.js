@@ -69,7 +69,7 @@ async function apiFetch(endpoint, options = {}) {
     try {
         response = await fetch(`${API_BASE_URL}${endpoint}`, config);
     } catch (error) {
-        throw new Error('Cannot connect to the server. Make sure the backend is running on http://localhost:5000.');
+        throw new Error('Network error: ' + error.message);
     }
 
     let data = null;
