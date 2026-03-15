@@ -9,7 +9,12 @@ const auth = {
     setToken: (t) => localStorage.setItem('ap_token', t),
     getUser:  () => {
         const u = localStorage.getItem('ap_user');
-        return u ? JSON.parse(u) : null;
+        try {
+            return (u && u !== 'undefined') ? JSON.parse(u) : null;
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+            return null;
+        }
     },
     setUser:  (u) => localStorage.setItem('ap_user', JSON.stringify(u)),
     logout:   async (redirectTo = 'index.html') => {
@@ -101,7 +106,7 @@ function setActiveNavLink() {
 
 // Update login button to show username when logged in
 function updateNavbar() {
-    const loginBtns = document.querySelectorAll('a[href="login.html"]');
+    const loginBtns = document.querySelectorAll('a[href*="login"]');
     if (loginBtns.length > 0 && auth.isLoggedIn()) {
         const user = auth.getUser();
         if (user) {
