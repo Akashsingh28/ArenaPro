@@ -42,7 +42,8 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     // Populate teams to be able to show who is participating
-    const tournament = await Tournament.findById(req.params.id).populate('teams', 'name logo captainUsername');
+    const tournament = await Tournament.findById(req.params.id)
+      .populate({ path: 'teams', select: 'name logo captainUsername', strictPopulate: false });
     if (!tournament) {
       return res.status(404).json({ success: false, message: 'Tournament not found' });
     }
@@ -67,7 +68,7 @@ router.post('/:id/register', protect, async (req, res) => {
     }
 
     const User = require('../models/User'); // Import User
-    const user = await User.findById(req.user.id).populate('team');
+    const user = await User.findById(req.user.id).populate({ path: 'team', strictPopulate: false });
     
     if (!user.team) {
       return res.status(400).json({ success: false, message: 'You must be part of a team to register' });
@@ -170,7 +171,8 @@ router.delete('/:id', protect, adminOnly, async (req, res) => {
 // ── POST /api/tournaments/:id/generate-bracket (admin only) ─────────────────
 router.post('/:id/generate-bracket', protect, adminOnly, async (req, res) => {
   try {
-    const tournament = await Tournament.findById(req.params.id).populate('teams');
+    const tournament = await Tournament.findById(req.params.id)
+      .populate({ path: 'teams', strictPopulate: false });
     if (!tournament) return res.status(404).json({ success: false, message: 'Tournament not found' });
     
     if (tournament.teams.length < 2) {
