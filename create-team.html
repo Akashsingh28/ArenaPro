@@ -233,6 +233,13 @@
 
     <script src="script.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!auth.isLoggedIn()) {
+                alert('You must be logged in to create a team. Redirecting to login...');
+                window.location.href = 'login.html';
+            }
+        });
+
         let selectedEmojiValue = '';
 
         function selectEmoji(emoji) {

@@ -105,11 +105,35 @@ function updateNavbar() {
     if (loginBtns.length > 0 && auth.isLoggedIn()) {
         const user = auth.getUser();
         if (user) {
-            loginBtns.forEach(btn => { btn.innerHTML = `<span class="nav-icon">👤</span> ${user.username}`;
-            btn.href = user.role === 'admin' ? 'admin.html' : 'player-profile.html'; });
+            loginBtns.forEach(btn => {
+                if (btn.classList.contains('btn-lg')) return; // Skip hero button
+                
+                const wrapper = document.createElement('div');
+                wrapper.style.display = 'flex';
+                wrapper.style.gap = '10px';
+                
+                const profileBtn = document.createElement('a');
+                profileBtn.className = 'btn btn-primary';
+                profileBtn.href = user.role === 'admin' ? 'admin.html' : 'player-profile.html';
+                profileBtn.innerHTML = `<span class="nav-icon">👤</span> Profile`;
+                
+                const logoutBtn = document.createElement('a');
+                logoutBtn.className = 'btn btn-outline';
+                logoutBtn.href = '#';
+                logoutBtn.innerHTML = `<span class="nav-icon">🚪</span> Logout`;
+                logoutBtn.onclick = (e) => {
+                    e.preventDefault();
+                    auth.logout();
+                };
+                
+                wrapper.appendChild(profileBtn);
+                wrapper.appendChild(logoutBtn);
+                
+                btn.parentNode.replaceChild(wrapper, btn);
+            });
         }
     }
-    
+
     // Check notifications if logged in
     if (auth.isLoggedIn()) {
         const countBadge = document.getElementById('nav-notif-count');
